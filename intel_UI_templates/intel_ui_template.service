@@ -1,0 +1,26 @@
+[Unit]
+Description=Main UI Web Server (Port 8080)
+After=network.target
+
+[Service]
+# User and Group to run the service as (rpi is your default user)
+User=rpi
+Group=rpi
+
+# Set the working directory to the directory containing app.py, templates, and static folders
+WorkingDirectory=/home/rpi/intel_UI_templates/
+
+# The command to execute: use python3 to run your app.py file
+# Note: debug=True is usually removed for production services, but keep it for now if needed.
+ExecStart=/usr/bin/python3 /home/rpi/intel_UI_templates/app.py
+
+# Restart the service if it crashes (useful for a stable UI)
+Restart=always
+RestartSec=5
+
+# Standard output and error logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
