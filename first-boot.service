@@ -1,0 +1,11 @@
+[Unit]
+Description=First Boot Setup
+After=network.target
+ 
+[Service]
+Type=oneshot
+ExecStart=/home/rpi/scripts/first_boot_setup.sh
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target
