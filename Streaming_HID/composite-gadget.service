@@ -9,4 +9,4 @@ ExecStart=/bin/bash -c 'USER=$(ls -1 /home | grep -v root | head -n1); exec /hom
 RemainAfterExit=true
  
 [Install]
-WantedBy=multi-user. Target
+WantedBy=multi-user.target
