@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=oneshot
 User=root
-ExecStart=/bin/bash -c 'USER=$(ls -1 /home | grep -v root | head -n1); exec /home/$USER/gadgets/setup_composite_gadget.sh'
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /home/$USER/gadgets/setup_composite_gadget.sh'
 RemainAfterExit=true
  
 [Install]
-WantedBy=multi-user. Target
+WantedBy=multi-user.target
