@@ -3,7 +3,7 @@ Description=Streaming HID Service
 After=network.target
  
 [Service]
-ExecStart=/bin/bash -c 'USER=$(ls -1 /home | grep -v root | head -n1); cd /home/$USER/Streaming_HID && exec /home/$USER/Streaming_HID/venv/bin/python /home/$USER/Streaming_HID/app.py'
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); cd /home/$USER/Streaming_HID && exec /home/$USER/Streaming_HID/venv/bin/python /home/$USER/Streaming_HID/app.py'
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
