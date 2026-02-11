@@ -6,9 +6,8 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/home/$(ls -1 /home | grep -v root | head -n1)/Postcode
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/bin/bash -c 'USER=$(ls -1 /home | grep -v root | head -n1); exec /home/$USER/Postcode/venv/bin/python /home/$USER/Postcode/app.py'
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /home/$USER/Postcode/venv/bin/python /home/$USER/Postcode/app.py'
 Restart=always
 RestartSec=3
  
