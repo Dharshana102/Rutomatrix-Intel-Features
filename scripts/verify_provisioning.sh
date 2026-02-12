@@ -1,7 +1,24 @@
 #!/bin/bash
  
-REPORT="/home/rpi/provision_verification_report.txt"
-BASE="/home/rpi"
+# =================================================
+# DYNAMIC USER DETECTION (Rutomatrix method)
+# =================================================
+ 
+if [ -f /boot/firmware/rutomatrix_user ]; then
+    USERNAME=$(cat /boot/firmware/rutomatrix_user)
+elif [ -f /boot/rutomatrix_user ]; then
+    USERNAME=$(cat /boot/rutomatrix_user)
+else
+    USERNAME=$(ls -1 /home | grep -v root | head -n1)
+fi
+ 
+if [ -z "$USERNAME" ]; then
+    echo "[ERROR] No user detected"
+    exit 1
+fi
+ 
+BASE="/home/$USERNAME"
+REPORT="$BASE/provision_verification_report.txt"
 MARKER="$BASE/.first_boot_done"
  
 exec > "$REPORT" 2>&1
@@ -9,12 +26,14 @@ exec > "$REPORT" 2>&1
 echo "====================================================="
 echo " RUTOMATRIX PROVISIONING VERIFICATION REPORT"
 echo " Generated on: $(date)"
+echo " User: $USERNAME"
 echo "====================================================="
 echo
  
 # -----------------------------------------------------
 # Helper functions
 # -----------------------------------------------------
+ 
 check_exists() {
     if [ -e "$1" ]; then
         echo "[OK] Exists: $1"
@@ -50,6 +69,7 @@ check_exec() {
 check_service() {
     local svc="$1"
     echo "Service: $svc"
+ 
     if systemctl list-unit-files | grep -q "^$svc"; then
         echo "  [OK] Installed"
     else
@@ -76,6 +96,7 @@ check_venv() {
 # -----------------------------------------------------
 # Global checks
 # -----------------------------------------------------
+ 
 echo "---- GLOBAL CHECKS ----"
 check_file "$MARKER"
 python3 --version
@@ -86,6 +107,7 @@ echo
 # -----------------------------------------------------
 # Feature directories
 # -----------------------------------------------------
+ 
 FEATURES=(
 "Streaming_HID"
 "Postcode"
@@ -107,6 +129,7 @@ echo
 # -----------------------------------------------------
 # Virtualenv checks
 # -----------------------------------------------------
+ 
 echo "---- PYTHON VENV CHECKS ----"
 for f in "${FEATURES[@]}"; do
     check_venv "$BASE/$f"
@@ -116,6 +139,7 @@ echo
 # -----------------------------------------------------
 # Key file checks
 # -----------------------------------------------------
+ 
 echo "---- KEY FILE CHECKS ----"
  
 check_file "$BASE/Streaming_HID/app.py"
@@ -132,6 +156,7 @@ echo
 # -----------------------------------------------------
 # Systemd services
 # -----------------------------------------------------
+ 
 echo "---- SYSTEMD SERVICE CHECKS ----"
 check_service "streaming_hid.service"
 check_service "composite-gadget.service"
@@ -141,15 +166,16 @@ check_service "intel_ui_template.service"
 echo
  
 # -----------------------------------------------------
-# Ownership check
+# Ownership check (Dynamic User)
 # -----------------------------------------------------
-echo "---- OWNERSHIP CHECK (rpi user) ----"
+ 
+echo "---- OWNERSHIP CHECK ($USERNAME user) ----"
 for f in "${FEATURES[@]}"; do
     owner=$(stat -c "%U" "$BASE/$f" 2>/dev/null)
-    if [ "$owner" = "rpi" ]; then
-        echo "[OK] Owner rpi: $BASE/$f"
+    if [ "$owner" = "$USERNAME" ]; then
+        echo "[OK] Owner $USERNAME: $BASE/$f"
     else
-        echo "[WARN] Owner not rpi ($owner): $BASE/$f"
+        echo "[WARN] Owner not $USERNAME ($owner): $BASE/$f"
     fi
 done
 echo
