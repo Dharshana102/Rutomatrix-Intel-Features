@@ -78,7 +78,7 @@ def start_logging():
             
             # Start the script in background mode
             current_process = subprocess.Popen(
-                ['sudo', '/home/rpi/Bios_serial_log.sh'],
+                ['/home/rpi/Bios_serial_log.sh'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
