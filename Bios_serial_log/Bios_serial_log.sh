@@ -16,7 +16,7 @@ if [ -z "$USERNAME" ]; then
 fi
  
 BASE_DIR="/home/$USERNAME"
-LOG_DIR="$BASE_DIR/serial_logs" 
+LOGDIR="$BASE_DIR/serial_logs" 
  
 # Create log folder
 mkdir -p "$LOGDIR"
