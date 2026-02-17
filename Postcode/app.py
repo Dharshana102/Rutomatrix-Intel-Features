@@ -7,9 +7,33 @@ import re
 from flask import Flask, jsonify, render_template, send_file, request
 from flask_cors import CORS
 from datetime import datetime
+from pathlib import Path
+ 
+# -------------------------------------------------
+# Detect Rutomatrix username dynamically
+# -------------------------------------------------
+def detect_user():
+    firmware_path = "/boot/firmware/rutomatrix_user"
+    boot_path = "/boot/rutomatrix_user"
+ 
+    if os.path.exists(firmware_path):
+        return Path(firmware_path).read_text().strip()
+    elif os.path.exists(boot_path):
+        return Path(boot_path).read_text().strip()
+    else:
+        # fallback: first non-root user in /home
+        users = [u for u in os.listdir("/home") if u != "root"]
+        return users[0] if users else None
+ 
+USERNAME = detect_user()
+ 
+if not USERNAME:
+    raise RuntimeError("Could not detect Rutomatrix user")
+ 
+BASE_DIR = f"/home/{USERNAME}"
 
 # Configuration
-LOGDIR = "/home/rpi/postcode_logs"
+LOGDIR = os.path.join(BASE_DIR, "postcode_logs")
 PORT = "/dev/ttyAMA0"
 BAUDRATE = 115200
 
