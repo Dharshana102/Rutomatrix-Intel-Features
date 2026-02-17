@@ -7,11 +7,36 @@ from datetime import datetime
 from queue import Queue, Empty
 import secrets
 
+from pathlib import Path
+ 
+# -------------------------------------------------
+# Detect Rutomatrix username dynamically
+# -------------------------------------------------
+def detect_user():
+    firmware_path = "/boot/firmware/rutomatrix_user"
+    boot_path = "/boot/rutomatrix_user"
+ 
+    if os.path.exists(firmware_path):
+        return Path(firmware_path).read_text().strip()
+    elif os.path.exists(boot_path):
+        return Path(boot_path).read_text().strip()
+    else:
+        # fallback: first non-root user in /home
+        users = [u for u in os.listdir("/home") if u != "root"]
+        return users[0] if users else None
+ 
+USERNAME = detect_user()
+ 
+if not USERNAME:
+    raise RuntimeError("Could not detect Rutomatrix user")
+ 
+BASE_DIR = f"/home/{USERNAME}"
+
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Generate a secret key for sessions
 
 # Configuration
-LOG_FILES_DIR = '/home/rpi/serial_logs'  # Update this path to your log files directory
+LOG_FILES_DIR = os.path.join(BASE_DIR, "serial_logs")  # Update this path to your log files directory
 current_process = None
 process_lock = threading.Lock()
 log_queue = Queue()
@@ -77,8 +102,9 @@ def start_logging():
                     break
             
             # Start the script in background mode
+            script_path = os.path.join(BASE_DIR, "Bios_serial_log.sh")
             current_process = subprocess.Popen(
-                ['/home/rpi/Bios_serial_log.sh'],
+                [script_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
