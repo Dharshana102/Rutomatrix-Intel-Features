@@ -110,4 +110,4 @@ def write_chip():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='100.109.50.57', port=5003, debug=True)
+    app.run(host='0.0.0.0', port=5003, debug=True)
