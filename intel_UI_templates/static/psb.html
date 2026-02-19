@@ -1441,7 +1441,7 @@
         btn.innerHTML = `<span class="spinner"></span>`;
 
         try {
-          const response = await fetch(`http://100.88.75.90:3333/power/${action}`, {
+          const response = await fetch(`http://${window.location.hostname}:3333/power/${action}`, {
             method: 'GET'
           });
           
@@ -1469,7 +1469,7 @@
 
       async function checkPowerStatus() {
         try {
-          const response = await fetch(`http://100.88.75.90:3333/state`);
+          const response = await fetch(`http://${window.location.hostname}:3333/state`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
           const data = await response.json();
@@ -1539,7 +1539,7 @@
       let logFiles = [];
 
       // Base URL configuration - fixed to use 5015 port from app.py
-      const POSTCODE_BASE_URL = `http://100.88.75.90:5015`;
+      const POSTCODE_BASE_URL = `http://${window.location.hostname}:5015`;
 
       // Update status function
       function updatePostcodeStatus(type, text) {
