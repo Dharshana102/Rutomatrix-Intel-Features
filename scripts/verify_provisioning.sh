@@ -89,6 +89,7 @@ FEATURES=(
 "Firmware"
 "Bios_serial_log"
 "PDU"
+"os"
 "gadgets"
 )
  
