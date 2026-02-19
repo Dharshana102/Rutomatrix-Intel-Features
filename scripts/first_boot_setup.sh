@@ -200,7 +200,7 @@ grep -q "^dtoverlay=uart1" "$CONFIG_FILE" || echo "dtoverlay=uart1" >> "$CONFIG_
 grep -q "^dtoverlay=disable-bt" "$CONFIG_FILE" || echo "dtoverlay=disable-bt" >> "$CONFIG_FILE"
 systemctl disable serial-getty@ttyAMA0.service 2>/dev/null || true
 # =================================================
-# SYSTEM ATS – STATE READING
+# SYSTEM ATX – STATE READING
 # =================================================
 RC_LOCAL="/etc/rc.local"
 if [ ! -f "$RC_LOCAL" ]; then
