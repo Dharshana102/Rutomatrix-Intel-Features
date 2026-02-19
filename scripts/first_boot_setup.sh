@@ -92,7 +92,12 @@ apt install -y \
     libjpeg-dev \
     libevent-dev \
     libbsd-dev \
-    build-essential
+    build-essential \
+    flask \
+    flask-cors \
+    fastapi \
+    uvicorn \
+    RPi.GPIO
 # =================================================
 # CLONE MAIN REPO
 # =================================================
