@@ -41,6 +41,7 @@ OS_FLASHING_DIR="$BASE_DIR/OS_Flashing"
 FIRMWARE_DIR="$BASE_DIR/Firmware"
 BIOS_SERIAL_DIR="$BASE_DIR/Bios_serial_log"
 PDU_DIR="$BASE_DIR/PDU"
+OS_DIR="$BASE_DIR/os"
 GADGETS_DIR="$BASE_DIR/gadgets"
 USTREAMER_DIR="$STREAMING_DIR/ustreamer"
 # =================================================
@@ -110,6 +111,8 @@ rm -rf "$OS_FLASHING_DIR" && cp -r "$BASE_DIR/$REPO_NAME/OS_Flashing" "$OS_FLASH
 rm -rf "$FIRMWARE_DIR" && cp -r "$BASE_DIR/$REPO_NAME/Firmware" "$FIRMWARE_DIR"
 rm -rf "$BIOS_SERIAL_DIR" && cp -r "$BASE_DIR/$REPO_NAME/Bios_serial_log" "$BIOS_SERIAL_DIR"
 rm -rf "$PDU_DIR" && cp -r "$BASE_DIR/$REPO_NAME/PDU" "$PDU_DIR"
+rm -rf "$OS_DIR" && cp -r "$BASE_DIR/$REPO_NAME/os" "$OS_DIR"
+ 
 # =================================================
 # EXTRACT USB GADGETS
 # =================================================
@@ -137,6 +140,7 @@ chown -R "$USERNAME:$USERNAME" \
     "$FIRMWARE_DIR" \
     "$BIOS_SERIAL_DIR" \
     "$PDU_DIR" \
+    "$OS_DIR" \
     "$GADGETS_DIR" 2>/dev/null || true
  
 
