@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User=root
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /home/$USER/System_Atx/venv/bin/python /home/$USER/System_Atx/server.py'
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /usr/bin/python3 /home/$USER/System_Atx/server.py'
 Restart=always
 RestartSec=3
  
