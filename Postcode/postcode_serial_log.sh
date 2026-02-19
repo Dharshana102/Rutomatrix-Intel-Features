@@ -1,7 +1,23 @@
 #!/bin/bash
-
+# -------------------------------------------------
+# Detect Rutomatrix username dynamically
+# -------------------------------------------------
+if [ -f /boot/firmware/rutomatrix_user ]; then
+    USERNAME=$(cat /boot/firmware/rutomatrix_user)
+elif [ -f /boot/rutomatrix_user ]; then
+    USERNAME=$(cat /boot/rutomatrix_user)
+else
+    USERNAME=$(ls -1 /home | grep -v root | head -n1)
+fi
+ 
+if [ -z "$USERNAME" ]; then
+    echo "ERROR: Could not detect Rutomatrix user"
+    exit 1
+fi
+ 
+BASE_DIR="/home/$USERNAME"
 # Folder where postcode logs will be stored
-LOGDIR="/home/rpi/postcode_logs"
+LOGDIR="$BASE_DIR/postcode_logs"
 
 # Serial configuration
 PORT="/dev/ttyAMA0"

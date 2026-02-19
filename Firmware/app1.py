@@ -2,6 +2,30 @@ from flask import Flask, jsonify, render_template, request
 import subprocess
 import os
 import re
+from pathlib import Path
+ 
+# -------------------------------------------------
+# Detect Rutomatrix username dynamically
+# -------------------------------------------------
+def detect_user():
+    firmware_path = "/boot/firmware/rutomatrix_user"
+    boot_path = "/boot/rutomatrix_user"
+ 
+    if os.path.exists(firmware_path):
+        return Path(firmware_path).read_text().strip()
+    elif os.path.exists(boot_path):
+        return Path(boot_path).read_text().strip()
+    else:
+        # fallback: first non-root user in /home
+        users = [u for u in os.listdir("/home") if u != "root"]
+        return users[0] if users else None
+ 
+USERNAME = detect_user()
+ 
+if not USERNAME:
+    raise RuntimeError("Could not detect Rutomatrix user")
+ 
+BASE_DIR = f"/home/{USERNAME}"
 
 app = Flask(__name__)
 
@@ -35,7 +59,7 @@ def detect():
 
 @app.route('/read', methods=['POST'])
 def read_chip():
-    base_dir = "/home/rpi/Documents"
+    base_dir = os.path.join(BASE_DIR, "Documents")
     base_name = "backup"
     extension = ".bin"
     
@@ -73,7 +97,7 @@ def read_chip():
 
 @app.route('/list-files', methods=['POST'])
 def list_files():
-    directory = "/home/rpi/Documents"
+    directory = os.path.join(BASE_DIR, "Documents")
     try:
         files = [os.path.join(directory, f)
                  for f in os.listdir(directory)
@@ -110,4 +134,4 @@ def write_chip():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='100.109.50.57', port=5003, debug=True)
+    app.run(host='0.0.0.0', port=5003, debug=True)
