@@ -1,0 +1,15 @@
+[Unit]
+Description=Firmware Flask Service
+After=network-online.target
+Wants=network-online.target
+ 
+[Service]
+Type=simple
+User=root
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /home/$USER/Firmware/venv/bin/python /home/$USER/Firmware/app1.py'
+Restart=always
+RestartSec=3
+ 
+[Install]
+WantedBy=multi-user.target
