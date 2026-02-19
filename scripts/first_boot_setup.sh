@@ -183,6 +183,11 @@ cp "$STREAMING_DIR/composite-gadget.service" /etc/systemd/system/
 cp "$OS_FLASHING_DIR/usb_mass_storage.service" /etc/systemd/system/ 2>/dev/null || true
 cp "$INTEL_UI_DIR/intel_ui_template.service" /etc/systemd/system/ 2>/dev/null || true
 cp "$POSTCODE_DIR/postcode.service" /etc/systemd/system/ 2>/dev/null || true
+cp "$BIOS_SERIAL_DIR/Bios_serial_log.service" /etc/systemd/system/ 2>/dev/null || true
+cp "$FIRMWARE_DIR/Firmware.service" /etc/systemd/system/ 2>/dev/null || true
+cp "$PDU_DIR/PDU.service" /etc/systemd/system/ 2>/dev/null || true
+cp "$SYSTEM_ATX_DIR/System_Atx.service" /etc/systemd/system/ 2>/dev/null || true
+
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable composite-gadget.service
@@ -190,11 +195,20 @@ systemctl enable streaming_hid.service
 systemctl enable usb_mass_storage.service 2>/dev/null || true
 systemctl enable intel_ui_template.service 2>/dev/null || true
 systemctl enable postcode.service 2>/dev/null || true
+systemctl enable Bios_serial_log.service 2>/dev/null || true
+systemctl enable Firmware.service 2>/dev/null || true
+systemctl enable PDU.service 2>/dev/null || true
+systemctl enable System_Atx.service 2>/dev/null || true
 systemctl start composite-gadget.service
 systemctl start streaming_hid.service
 systemctl start usb_mass_storage.service 2>/dev/null || true
 systemctl start intel_ui_template.service 2>/dev/null || true
 systemctl start postcode.service 2>/dev/null || true
+systemctl start Bios_serial_log.service 2>/dev/null || true
+systemctl start Firmware.service 2>/dev/null || true
+systemctl start PDU.service 2>/dev/null || true
+systemctl start System_Atx.service 2>/dev/null || true
+
 # =================================================
 # POSTCODE – UART ENABLE (NO GUI)
 # =================================================
