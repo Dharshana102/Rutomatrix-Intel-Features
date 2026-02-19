@@ -20,6 +20,7 @@ fi
 BASE="/home/$USERNAME"
 REPORT="$BASE/provision_verification_report.txt"
 MARKER="$BASE/.first_boot_done"
+LOGFILE="$BASE/first_boot.log"
  
 exec > "$REPORT" 2>&1
  
@@ -34,48 +35,17 @@ echo
 # Helper functions
 # -----------------------------------------------------
  
-check_exists() {
-    if [ -e "$1" ]; then
-        echo "[OK] Exists: $1"
-    else
-        echo "[FAIL] Missing: $1"
-    fi
-}
- 
-check_dir() {
-    if [ -d "$1" ]; then
-        echo "[OK] Directory: $1"
-    else
-        echo "[FAIL] Directory missing: $1"
-    fi
-}
- 
-check_file() {
-    if [ -f "$1" ]; then
-        echo "[OK] File: $1"
-    else
-        echo "[FAIL] File missing: $1"
-    fi
-}
- 
-check_exec() {
-    if [ -x "$1" ]; then
-        echo "[OK] Executable: $1"
-    else
-        echo "[FAIL] Not executable: $1"
-    fi
-}
+check_file() { [ -f "$1" ] && echo "[OK] File: $1" || echo "[FAIL] Missing file: $1"; }
+check_dir() { [ -d "$1" ] && echo "[OK] Directory: $1" || echo "[FAIL] Missing directory: $1"; }
+check_exec() { [ -x "$1" ] && echo "[OK] Executable: $1" || echo "[FAIL] Not executable: $1"; }
  
 check_service() {
     local svc="$1"
     echo "Service: $svc"
  
-    if systemctl list-unit-files | grep -q "^$svc"; then
-        echo "  [OK] Installed"
-    else
-        echo "  [FAIL] Not installed"
-        return
-    fi
+    systemctl list-unit-files | grep -q "^$svc" \
+&& echo "  [OK] Installed" \
+        || { echo "  [FAIL] Not installed"; return; }
  
     systemctl is-enabled "$svc" &>/dev/null \
 && echo "  [OK] Enabled" \
@@ -88,24 +58,25 @@ check_service() {
  
 check_venv() {
     local dir="$1"
-    echo "Virtualenv: $dir"
     check_dir "$dir/venv"
     check_exec "$dir/venv/bin/python"
 }
  
 # -----------------------------------------------------
-# Global checks
+# GLOBAL CHECKS
 # -----------------------------------------------------
  
 echo "---- GLOBAL CHECKS ----"
 check_file "$MARKER"
+check_file "$LOGFILE"
 python3 --version
 pip3 --version
 check_exec "/usr/local/bin/ustreamer"
+flashrom --version &>/dev/null && echo "[OK] flashrom installed" || echo "[WARN] flashrom not installed"
 echo
  
 # -----------------------------------------------------
-# Feature directories
+# FEATURE DIRECTORIES
 # -----------------------------------------------------
  
 FEATURES=(
@@ -118,6 +89,7 @@ FEATURES=(
 "Firmware"
 "Bios_serial_log"
 "PDU"
+"gadgets"
 )
  
 echo "---- FEATURE DIRECTORY CHECKS ----"
@@ -127,34 +99,17 @@ done
 echo
  
 # -----------------------------------------------------
-# Virtualenv checks
+# PYTHON VENV CHECKS
 # -----------------------------------------------------
  
 echo "---- PYTHON VENV CHECKS ----"
 for f in "${FEATURES[@]}"; do
-    check_venv "$BASE/$f"
+    [ "$f" != "gadgets" ] && check_venv "$BASE/$f"
 done
 echo
  
 # -----------------------------------------------------
-# Key file checks
-# -----------------------------------------------------
- 
-echo "---- KEY FILE CHECKS ----"
- 
-check_file "$BASE/Streaming_HID/app.py"
-check_file "$BASE/Postcode/app.py"
-check_exec "$BASE/Postcode/postcode_serial_log.sh"
-check_file "$BASE/Bios_serial_log/app.py"
-check_exec "$BASE/Bios_serial_log/Bios_serial_log.sh"
-check_file "$BASE/PDU/app.py"
-check_file "$BASE/OS_Flashing/app.py"
-check_file "$BASE/Firmware/app1.py"
- 
-echo
- 
-# -----------------------------------------------------
-# Systemd services
+# SYSTEMD SERVICE CHECKS
 # -----------------------------------------------------
  
 echo "---- SYSTEMD SERVICE CHECKS ----"
@@ -166,16 +121,60 @@ check_service "intel_ui_template.service"
 echo
  
 # -----------------------------------------------------
-# Ownership check (Dynamic User)
+# UART CHECK
 # -----------------------------------------------------
  
-echo "---- OWNERSHIP CHECK ($USERNAME user) ----"
+echo "---- UART CONFIG CHECK ----"
+CONFIG="/boot/firmware/config.txt"
+grep -q "^enable_uart=1" "$CONFIG" && echo "[OK] enable_uart=1" || echo "[FAIL] enable_uart missing"
+grep -q "^dtoverlay=uart1" "$CONFIG" && echo "[OK] dtoverlay=uart1" || echo "[FAIL] uart1 overlay missing"
+grep -q "^dtoverlay=disable-bt" "$CONFIG" && echo "[OK] disable-bt set" || echo "[FAIL] disable-bt missing"
+ 
+systemctl is-enabled serial-getty@ttyAMA0.service &>/dev/null \
+&& echo "[WARN] serial-getty still enabled" \
+    || echo "[OK] serial-getty disabled"
+echo
+ 
+# -----------------------------------------------------
+# SPI CHECK
+# -----------------------------------------------------
+ 
+echo "---- SPI CONFIG CHECK ----"
+grep -q "^dtparam=spi=on" "$CONFIG" && echo "[OK] SPI enabled in config.txt" || echo "[FAIL] SPI not enabled"
+grep -q "^spi-dev" /etc/modules-load.d/raspberrypi.conf \
+&& echo "[OK] spi-dev module present" \
+    || echo "[FAIL] spi-dev module missing"
+echo
+ 
+# -----------------------------------------------------
+# RC.LOCAL CHECK (SYSTEM ATX)
+# -----------------------------------------------------
+ 
+echo "---- SYSTEM ATX (rc.local) CHECK ----"
+if grep -q "raspi-gpio set 20" /etc/rc.local; then
+    echo "[OK] GPIO 20 config present"
+else
+    echo "[FAIL] GPIO 20 config missing"
+fi
+ 
+if grep -q "i2cset -y 1 0x72 2" /etc/rc.local; then
+    echo "[OK] I2C ATX command present"
+else
+    echo "[FAIL] I2C ATX command missing"
+fi
+echo
+ 
+# -----------------------------------------------------
+# OWNERSHIP CHECK
+# -----------------------------------------------------
+ 
+echo "---- OWNERSHIP CHECK ($USERNAME) ----"
 for f in "${FEATURES[@]}"; do
     owner=$(stat -c "%U" "$BASE/$f" 2>/dev/null)
     if [ "$owner" = "$USERNAME" ]; then
-        echo "[OK] Owner $USERNAME: $BASE/$f"
+        echo "[OK] Owner correct: $BASE/$f"
     else
-        echo "[WARN] Owner not $USERNAME ($owner): $BASE/$f"
+        echo "[WARN] Owner incorrect ($owner): $BASE/$f"
     fi
 done
 echo
