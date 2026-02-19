@@ -192,6 +192,36 @@ systemctl start usb_mass_storage.service 2>/dev/null || true
 systemctl start intel_ui_template.service 2>/dev/null || true
 systemctl start postcode.service 2>/dev/null || true
 # =================================================
+# POSTCODE – UART ENABLE (NO GUI)
+# =================================================
+CONFIG_FILE="/boot/firmware/config.txt"
+grep -q "^enable_uart=1" "$CONFIG_FILE" || echo "enable_uart=1" >> "$CONFIG_FILE"
+grep -q "^dtoverlay=uart1" "$CONFIG_FILE" || echo "dtoverlay=uart1" >> "$CONFIG_FILE"
+grep -q "^dtoverlay=disable-bt" "$CONFIG_FILE" || echo "dtoverlay=disable-bt" >> "$CONFIG_FILE"
+systemctl disable serial-getty@ttyAMA0.service 2>/dev/null || true
+# =================================================
+# SYSTEM ATS – STATE READING
+# =================================================
+RC_LOCAL="/etc/rc.local"
+if [ ! -f "$RC_LOCAL" ]; then
+cat << 'EOF' > "$RC_LOCAL"
+#!/bin/sh -e
+exit 0
+EOF
+fi
+sed -i '/raspi-gpio set 20/d' "$RC_LOCAL"
+sed -i '/i2cset -y 1 0x72 2/d' "$RC_LOCAL"
+sed -i '/^exit 0/i \
+raspi-gpio set 20 op dh\n\
+i2cset -y 1 0x72 2\n' "$RC_LOCAL"
+chmod +x "$RC_LOCAL"
+# =================================================
+# FIRMWARE FLASHING – SPI ENABLE
+# =================================================
+grep -q "^dtparam=spi=on" "$CONFIG_FILE" || echo "dtparam=spi=on" >> "$CONFIG_FILE"
+grep -q "^spi-dev" /etc/modules-load.d/raspberrypi.conf || echo "spi-dev" >> /etc/modules-load.d/raspberrypi.conf
+flashrom --version || echo "[WARN] flashrom not detected"
+# =================================================
 # FINAL STEP: RUN PROVISIONING VERIFICATION
 # =================================================
  
