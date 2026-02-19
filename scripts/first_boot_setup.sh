@@ -6,7 +6,6 @@ set -e
 # -------------------------------------------------
 # Dynamically detect Rutomatrix user safely
 # -------------------------------------------------
- 
 if [ -f /boot/firmware/rutomatrix_user ]; then
     USERNAME=$(cat /boot/firmware/rutomatrix_user)
 elif [ -f /boot/rutomatrix_user ]; then
@@ -14,19 +13,15 @@ elif [ -f /boot/rutomatrix_user ]; then
 else
     USERNAME=$(ls -1 /home | grep -v root | head -n1)
 fi
- 
 if [ -z "$USERNAME" ]; then
     echo "[ERROR] No user detected"
     exit 1
 fi
- 
 BASE_DIR="/home/$USERNAME"
- 
 # Wait until home directory exists
 while [ ! -d "$BASE_DIR" ]; do
     sleep 2
 done
- 
 echo "[INFO] Using user: $USERNAME"
 MARKER="$BASE_DIR/.first_boot_done"
 LOG="$BASE_DIR/first_boot.log"
@@ -93,11 +88,9 @@ apt install -y \
     libevent-dev \
     libbsd-dev \
     build-essential \
-    flask \
-    flask-cors \
-    fastapi \
-    uvicorn \
-    RPi.GPIO
+    i2c-tools \
+    raspi-gpio \
+    flashrom
 # =================================================
 # CLONE MAIN REPO
 # =================================================
@@ -117,7 +110,6 @@ rm -rf "$FIRMWARE_DIR" && cp -r "$BASE_DIR/$REPO_NAME/Firmware" "$FIRMWARE_DIR"
 rm -rf "$BIOS_SERIAL_DIR" && cp -r "$BASE_DIR/$REPO_NAME/Bios_serial_log" "$BIOS_SERIAL_DIR"
 rm -rf "$PDU_DIR" && cp -r "$BASE_DIR/$REPO_NAME/PDU" "$PDU_DIR"
 rm -rf "$OS_DIR" && cp -r "$BASE_DIR/$REPO_NAME/os" "$OS_DIR"
- 
 # =================================================
 # EXTRACT USB GADGETS
 # =================================================
@@ -129,11 +121,9 @@ chmod +x "$GADGETS_DIR"/*.sh
 # PERMISSIONS
 # =================================================
 echo "[FIRST BOOT] Setting permissions"
- 
 chmod +x "$USB_SHARE_DIR/usb_file_sharing.py" 2>/dev/null || true
 chmod +x "$SYSTEM_ATX_DIR"/*.sh 2>/dev/null || true
 chmod +x "$BIOS_SERIAL_DIR/Bios_serial_log.sh" 2>/dev/null || true
- 
 # Dynamically assign ownership to detected user
 chown -R "$USERNAME:$USERNAME" \
     "$STREAMING_DIR" \
@@ -188,11 +178,10 @@ cp "$STREAMING_DIR/composite-gadget.service" /etc/systemd/system/
 cp "$OS_FLASHING_DIR/usb_mass_storage.service" /etc/systemd/system/ 2>/dev/null || true
 cp "$INTEL_UI_DIR/intel_ui_template.service" /etc/systemd/system/ 2>/dev/null || true
 cp "$POSTCODE_DIR/postcode.service" /etc/systemd/system/ 2>/dev/null || true
-cp "$BIOS_SERIAL_DIR/Bios_serial_log.service" /etc/systemd/system/ 2>/dev/null || true
-cp "$FIRMWARE_DIR/Firmware.service" /etc/systemd/system/ 2>/dev/null || true
-cp "$PDU_DIR/PDU.service" /etc/systemd/system/ 2>/dev/null || true
-cp "$SYSTEM_ATX_DIR/System_Atx.service" /etc/systemd/system/ 2>/dev/null || true
-
+cp "$BIOS_SERIAL_DIR/Bios_serial_log.service" /etc/systemd/system 2>/dev/null || true
+cp "$FIRMWARE_DIR/Firmware.service" /etc/systemd/system 2>/dev/null || true
+cp "$PDU_DIR/PDU.service" /etc/systemd/system 2>/dev/null || true
+cp "$SYSTEM_ATX_DIR/System_Atx.service" /etc/systemd/system 2>/dev/null || true
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable composite-gadget.service
@@ -213,7 +202,6 @@ systemctl start Bios_serial_log.service 2>/dev/null || true
 systemctl start Firmware.service 2>/dev/null || true
 systemctl start PDU.service 2>/dev/null || true
 systemctl start System_Atx.service 2>/dev/null || true
-
 # =================================================
 # POSTCODE – UART ENABLE (NO GUI)
 # =================================================
@@ -247,11 +235,8 @@ flashrom --version || echo "[WARN] flashrom not detected"
 # =================================================
 # FINAL STEP: RUN PROVISIONING VERIFICATION
 # =================================================
- 
 echo "[FIRST BOOT] Running provisioning verification report"
- 
 VERIFY_SCRIPT="$BASE_DIR/scripts/verify_provisioning.sh"
- 
 if [ -x "$VERIFY_SCRIPT" ]; then
     bash "$VERIFY_SCRIPT"
     echo "[FIRST BOOT] Verification report generated:"
