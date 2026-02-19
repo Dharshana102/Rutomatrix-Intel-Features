@@ -119,6 +119,10 @@ check_service "composite-gadget.service"
 check_service "usb_mass_storage.service"
 check_service "postcode.service"
 check_service "intel_ui_template.service"
+check_service "Bios_serial_log.service"
+check_service "Firmware.service"
+check_service "PDU.service"
+check_service "System_Atx.service"
 echo
  
 # -----------------------------------------------------
