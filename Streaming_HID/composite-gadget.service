@@ -1,12 +1,12 @@
 [Unit]
 Description=Setup HID + Mass Storage USB gadget
 After=network.target
- 
+
 [Service]
 Type=oneshot
 User=root
-ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /home/$USER/gadgets/setup_composite_gadget.sh'
+ExecStart=/home/rpi/Streaming_HID/gadgets/setup_composite_gadget.sh
 RemainAfterExit=true
- 
+
 [Install]
 WantedBy=multi-user.target

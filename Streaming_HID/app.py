@@ -5,6 +5,7 @@ import socket
 import os
 import signal
 import time
+import socket
 import re
 
 app = Flask(__name__)
@@ -44,15 +45,21 @@ for block in devices:
                 hub_port_mapping[usb_path] = sorted(video_lines, key=lambda x: int(x.replace("/dev/video","")))[0]
 
 # -----------------------------
-# Select the device for the first hub port or fallback
+# Select a valid USB hub device dynamically
 # -----------------------------
-usb_video = hub_port_mapping.get("usb-0000:01:00.0-1.1.1")  # first hub port
+usb_video = None
 
-# Fallback: if first hub port doesn't exist (single capture connected directly)
+# Prioritize known hub prefixes dynamically (1.1.x, 1.2.x, 1.3.x, etc.)
+for usb_path in sorted(hub_port_mapping.keys()):
+    if re.search(r"usb-0000:01:00\.0-1\.\d(\.\d+)?", usb_path):  # match any 1.X.X pattern
+        usb_video = hub_port_mapping[usb_path]
+        break
+
+# Fallback: use the first available device if none matched pattern
 if not usb_video and hub_port_mapping:
     usb_video = list(hub_port_mapping.values())[0]
 
-print(f"Virtual Desk video device: {usb_video}")
+print("Detected USB video device:", usb_video)
 
 
 USTREAMER_CMD = [
@@ -219,9 +226,29 @@ def smooth_mouse_delta(x, y, threshold=1):
     y = y if abs(y) >= threshold else 0
     return x, y
 
+def get_local_ip():
+    """Dynamically finds the local IP address of the machine."""
+    s = None
+    try:
+        # Create a temporary socket to connect to an external address 
+        # (doesn't actually send data) to determine the network interface's IP.
+        # Using Google's public DNS address (8.8.8.8) is common practice.
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip_address = s.getsockname()[0]
+        return ip_address
+    except Exception as e:
+        print(f"Error getting local IP: {e}. Falling back to 127.0.0.1.")
+        return "127.0.0.1"
+    finally:
+        if s:
+            s.close()
+
 @app.route("/")
 def index():
-    return render_template("index.html", stream_host="172.16.38.22")
+    # Dynamically get the IP address of the RPi
+    rpi_ip = get_local_ip()
+    return render_template("index.html", stream_host=rpi_ip)
 
 
 @app.route("/shortcut/<name>", methods=["POST"])

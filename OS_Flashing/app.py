@@ -4,30 +4,6 @@ import subprocess
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import time
-from pathlib import Path
- 
-# -------------------------------------------------
-# Detect Rutomatrix username dynamically
-# -------------------------------------------------
-def detect_user():
-    firmware_path = "/boot/firmware/rutomatrix_user"
-    boot_path = "/boot/rutomatrix_user"
- 
-    if os.path.exists(firmware_path):
-        return Path(firmware_path).read_text().strip()
-    elif os.path.exists(boot_path):
-        return Path(boot_path).read_text().strip()
-    else:
-        # fallback: first non-root user in /home
-        users = [u for u in os.listdir("/home") if u != "root"]
-        return users[0] if users else None
- 
-USERNAME = detect_user()
- 
-if not USERNAME:
-    raise RuntimeError("Could not detect Rutomatrix user")
- 
-BASE_DIR = f"/home/{USERNAME}"
 
 app = FastAPI()
 
@@ -39,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ISO_DIR = os.path.join(BASE_DIR, "os")
+ISO_DIR = "/home/rpi/os"
 LUN_FILE = "/sys/kernel/config/usb_gadget/composite_gadget/functions/mass_storage.usb0/lun.0/file"
 
 @app.get("/list")
