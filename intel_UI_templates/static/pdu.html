@@ -300,35 +300,35 @@
         }
 
         /* ON State Styling */
-        .power-btn.on-state {
+        .power-btn.off-state {
             background: linear-gradient(135deg, var(--success), #059669);
             color: white;
         }
 
-        .power-btn.on-state:hover {
+        .power-btn.off-state:hover {
             background: linear-gradient(135deg, #059669, var(--success));
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
 
-        .power-btn.on-state:active {
+        .power-btn.off-state:active {
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
         /* OFF State Styling */
-        .power-btn.off-state {
+        .power-btn.on-state {
             background: linear-gradient(135deg, var(--danger), #dc2626);
             color: white;
         }
 
-        .power-btn.off-state:hover {
+        .power-btn.on-state:hover {
             background: linear-gradient(135deg, #dc2626, var(--danger));
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
         }
 
-        .power-btn.off-state:active {
+        .power-btn.on-state:active {
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
@@ -622,11 +622,11 @@
                     }
 
                     const data = await res.json();
-                    
+
                     // Update UI with server response to ensure sync
                     updateUI(data.relay_on, true);
                     updateStatus(true);
-                    
+
                 } catch (error) {
                     console.error("Error toggling power:", error);
                     // Revert UI on error by fetching current status

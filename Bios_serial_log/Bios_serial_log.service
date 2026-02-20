@@ -1,13 +1,13 @@
 [Unit]
-Description=Bios Serial Log Flask Service
+Description=Bios Serial Log
 After=network-online.target
 Wants=network-online.target
  
 [Service]
 Type=simple
-User=root
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); exec /usr/bin/python3 /home/$USER/Bios_serial_log/app.py'
+WorkingDirectory=/bin
 Restart=always
 RestartSec=3
  
