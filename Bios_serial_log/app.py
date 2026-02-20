@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template, request, session
+from flask_cors import CORS
 import subprocess
 import os
 import threading
@@ -34,6 +35,7 @@ BASE_DIR = f"/home/{USERNAME}"
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Generate a secret key for sessions
+CORS(app, supports_credentials=True)
 
 # Configuration
 LOG_FILES_DIR = os.path.join(BASE_DIR, "serial_logs")  # Update this path to your log files directory
@@ -226,4 +228,4 @@ def get_file(filename):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=1848, debug=True)
+    app.run(host='0.0.0.0', port=1818, debug=True)
