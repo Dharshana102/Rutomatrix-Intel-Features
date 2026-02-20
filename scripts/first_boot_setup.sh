@@ -92,6 +92,19 @@ apt install -y \
     raspi-gpio \
     flashrom
 # =================================================
+# GLOBAL PYTHON PACKAGES (PIP - SYSTEM LEVEL)
+# =================================================
+echo "[FIRST BOOT] Installing global Python packages"
+
+python3 -m pip install --upgrade pip --break-system-packages
+
+python3 -m pip install --break-system-packages \
+    flask \
+    flask-cors \
+    fastapi \
+    uvicorn \
+    RPi.GPIO
+# =================================================
 # CLONE MAIN REPO
 # =================================================
 cd "$BASE_DIR"
@@ -137,8 +150,8 @@ chown -R "$USERNAME:$USERNAME" \
     "$PDU_DIR" \
     "$OS_DIR" \
     "$GADGETS_DIR" 2>/dev/null || true
- 
 
+ 
 # =================================================
 # PYTHON VIRTUAL ENVIRONMENTS
 # =================================================
@@ -244,8 +257,8 @@ if [ -x "$VERIFY_SCRIPT" ]; then
 else
     echo "[WARN] Verification script not found or not executable"
 fi
- 
 
+ 
 # =================================================
 # MARK FIRST BOOT COMPLETE
 # =================================================
