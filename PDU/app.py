@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import RPi.GPIO as GPIO
 import atexit
 import time
@@ -32,6 +33,7 @@ def cleanup():
 atexit.register(cleanup)
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)
 
 @app.route("/")
 def index():
