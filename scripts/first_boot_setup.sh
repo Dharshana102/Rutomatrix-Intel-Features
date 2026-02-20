@@ -103,6 +103,7 @@ python3 -m pip install --break-system-packages \
     flask-cors \
     fastapi \
     uvicorn \
+    waitress \
     RPi.GPIO
 # =================================================
 # CLONE MAIN REPO
