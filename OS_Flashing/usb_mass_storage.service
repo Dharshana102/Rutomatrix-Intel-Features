@@ -4,7 +4,7 @@ After=network.target
  
 [Service]
 User=root
-ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); cd /home/$USER/OS_Flashing && exec /home/$USER/OS_Flashing/venv/bin/python /home/$USER/OS_Flashing/app.py'
+ExecStart=/bin/bash -c 'USER=$(cat /boot/firmware/rutomatrix_user); cd /home/$USER/OS_Flashing && exec /usr/bin/python3 /home/$USER/OS_Flashing/app.py'
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
