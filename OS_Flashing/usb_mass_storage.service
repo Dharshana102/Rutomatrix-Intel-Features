@@ -10,4 +10,4 @@ RestartSec=5
 Environment=PYTHONUNBUFFERED=1
  
 [Install]
-WantedBy=multi-user. Target
+WantedBy=multi-user.target
