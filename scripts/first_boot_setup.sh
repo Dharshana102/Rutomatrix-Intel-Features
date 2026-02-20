@@ -157,12 +157,13 @@ chown -R "$USERNAME:$USERNAME" \
 # PYTHON VIRTUAL ENVIRONMENTS
 # =================================================
 setup_venv () {
-    cd "$1"
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install --upgrade pip
-    [ -f requirements.txt ] && pip install -r requirements.txt
-    deactivate
+    sudo -u "$USERNAME" bash -c "
+        cd '$1'
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        [ -f requirements.txt ] && pip install -r requirements.txt
+    "
 }
 setup_venv "$STREAMING_DIR"
 setup_venv "$POSTCODE_DIR"
